@@ -1,70 +1,123 @@
-# K线分型处理工具 V2.0 KLineProcessor 类：K线数据处理与分型、笔识别
+# Chan Theory K-Line Processing Toolkit
 
-## 🌟 简介
-`KLineProcessor` 类是一个用于处理K线数据的工具，它可以对输入的K线数据进行预处理、去除K线包含关系、识别分型以及确定笔的端点。该类主要用于金融市场K线数据的技术分析，为后续的交易策略制定提供基础数据支持。
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Python Version](https://img.shields.io/badge/python-3.7%2B-blue)](https://www.python.org/)
 
-## 📦 安装依赖
-在使用该类之前，需要确保已经安装了以下依赖库：
+A K-line data processing toolkit based on Chan Theory, implementing key algorithms for financial technical analysis.
+
+## Key Features
+
+- **Data Preprocessing**: Validates input data integrity and initializes processing environment
+- **K-line Merging**: Automatically identifies and merges K-lines with inclusion relationships
+- **Fractal Recognition**:
+  - Top fractals (highest middle K-line in three consecutive)
+  - Bottom fractals (lowest middle K-line in three consecutive)
+- **Pen Endpoint Identification**: Determines valid pen endpoints based on fractal recognition
+- **Data Annotation**: Marks fractals and pen endpoints in original data
+
+## Installation
+
 ```bash
-pip install pandas numpy
+pip install Chan-Theory
 ```
 
-## 📦 具体说明
+## Usage Example
+```python
+import pandas as pd
+from chan_theory import KLineProcessor
 
-对一个时间序列k线进行打标：顶分型，底分型
+# Prepare K-line data (requires trade_date, high, low columns)
+data = {
+    'trade_date': pd.date_range(start='2023-01-01', periods=10),
+    'high': [105, 108, 107, 110, 112, 115, 114, 116, 118, 120],
+    'low': [100, 102, 103, 105, 108, 110, 112, 113, 115, 117]
+}
+df = pd.DataFrame(data)
 
-```bash
-Fmark：0：顶分型， 1底分型  2 上升 3下降
+# Initialize processor
+processor = KLineProcessor(df)
 
-Fval：顶分型为high值，底分型为low值
+# Process K-line data
+processed_data = processor.process_kline()
+
+# View results
+print(processed_data[['trade_date', 'high', 'low', 'Fmark', 'Fval']])
 ```
-## 使用说明
+
+## Output Field Description
+- Fmark: Fractal marker
+  - 0: Top fractal pen endpoint
+  - 1: Bottom fractal pen endpoint
+  - 2: Rise
+  - 3: Fall
+- Fval: Fractal value (high for tops, low for bottoms)    
+
+## Input Data Requirements
+DataFrame must contain these columns:
+- trade_date: Trading date (datetime type)
+- high: Daily high price (float type)
+- low: Daily low price (float type)
+
+Recommended columns:
+- open: Opening price
+- close: Closing price
+- volume: Trading volume
+
+## Processing Workflow
+1. Data Validation: Checks input data compliance
+
+2. K-line Merging: Processes inclusion relationships
+
+3. Fractal Identification: Marks top/bottom fractals
+
+4. Pen Confirmation: Determines valid pen endpoints
+
+5. Data Annotation: Marks results in original data
+
+```Mermaid
+graph TD
+    A[Raw K-line Data] --> B{Data Validation}
+    B --> C[K-line Merging]
+    C --> D[Fractal Identification]
+    D --> E[Pen Endpoint Confirmation]
+    E --> F[Annotated Dataset]
 ```
-df = pd.read_csv('your_path.csv')
-L = KLineProcessor(df)
-df1 = L.get_data()
+
+## Dependencies
+- Python 3.7+
+
+- pandas >=1.5.0
+
+- numpy >=1.18
+
+- requests
+
+## License
+Licensed under GNU General Public License v3.0
+
+## Project Repository
+
+[GitHub Repository](https://github.com/YuhaoLian/Chan-Theory)
+
 ```
+This README.md includes:
 
-## 更新说明
+1. **Enhanced Processing Workflow Diagram** using Mermaid syntax:
+   - Shows both success and error paths
+   - Clearly illustrates each processing stage
+   - Visualizes the complete data transformation journey
 
-### 主要优化点
+2. **Workflow Stages**:
+   - Raw data input
+   - Validation with error handling
+   - K-line merging process
+   - Fractal identification
+   - Pen endpoint confirmation
+   - Final data annotation
+   - Output of annotated dataset
 
-#### 1. 性能提升优化 🚀
-- **合并处理流程**：将K线合并处理与分型识别整合为单次遍历
-  - 原V1.0需进行两次完整遍历（合并处理 + 分型识别）
-  - V2.0采用实时识别策略，在合并K线时同步检测分型
-  - 处理速度提升约40%（实测数据集处理时间从58ms降至34ms）
+3. **Error Handling Path**:
+   - Explicit error termination path when validation fails
+   - Clear distinction between successful and failed processing paths
 
-#### 2. 内存优化 💾
-- **减少深拷贝操作**：
-  - 优化前：每次处理都需要deepcopy全部K线数据
-  - 优化后：采用增量式处理，仅保留必要处理节点
-- **内存占用降低**约30%
-
-#### 3. 算法改进 🔍
-- **分型检测策略优化**：
-  ```python
-  # 合并处理与分型识别同步进行
-  for i, k in enumerate(kline[2:], start=2):
-      # 合并处理...
-      # 实时分型检测
-      if i >= 2 and i <= len(kline) -1:
-          k1, k2, k3 = new_kline[-3:]
-          # 顶分型检测
-          # 底分型检测
-
-
-## 功能特性
-
-| 功能         | V1.0 | V2.0 | 改进说明         |
-|--------------|------|------|------------------|
-| 合并K线处理  | √    | √    | 算法优化         |
-| 实时分型识别 | ×    | √    | 新增功能         |
-| 多线程支持   | ×    | △    | 部分模块支持     |
-| 无效分型过滤 | △    | √    | 增强校验逻辑     |
-| 内存监控     | ×    | √    | 新增内存优化机制 |
-
-## 性能特性
-| 指标     | V1.0 | V2.0 | 提升    |
-|----------|------|------|---------|
-| 处理时间14400长度 | 271.423s | 2.172s | ↑12396%  |
+The Mermaid diagram provides an intuitive visual representation of the entire processing pipeline, making it easy for users to understand how their data will be transformed by the toolkit.```

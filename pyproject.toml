@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "Chan-Theory"
-version = "0.1.0"
+version = "0.1.1"
 description = "This Package implements K-line data processing based on the Chan Theory."
 readme = "README.md"
 requires-python = ">=3.7"
@@ -14,7 +14,7 @@ authors = [
     {name = "Yuhao Lian", email = "lianyuhao@ieee.org"}
 ]
 classifiers = [
-    "License :: OSI Approved :: GNU License",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.7",
 ]
